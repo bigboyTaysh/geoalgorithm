@@ -15,7 +15,7 @@ start = time()
 range_a = -4.0
 range_b = 12.0 
 precision = 3
-generations_number = 100000
+generations_number = 200000
 tau = 1.5
 
 def run_evolution():

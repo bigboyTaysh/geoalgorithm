@@ -8,6 +8,7 @@ import time
 import csv
 from time import time
 import numba
+from models import Individual
 
 @numba.jit(nopython=True, fastmath=True)
 def random_real(range_a,  range_b,  precision):
@@ -51,14 +52,15 @@ def get_individual(range_a,  range_b, precision, power):
     int_from_real = real_to_int(real, range_a, range_b, power)
     return int_to_bin(int_from_real, power)
 
-
-@numba.jit(nopython=True, parallel=True, fastmath=True)
-def mutation(bins, new, power, generations_number):
-    for i in numpy.arange(1, generations_number):
-        for bit in numpy.arange(power):
-            new[bit] = bins[i]
-            new[bit, bit] = 1 - new[bit, bit]
-            func(new[bit, bit])
+@numba.jit(nopython=True, fastmath=True, parallel=True)
+def mutation(bins, new_bin, new_fxs, power, generations_number):
+    for bit in numpy.arange(power):
+        new_bin[bit] = bins
+        new_bin[bit, bit] = 1 - new_bin[bit, bit]
+        new_fxs[bit] = func(new_bin[bit, bit])
+        #individuals[bit] = Individual(new_bin[bit], func(new_bin[bit, bit]))
+        #individuals[bit].binary = new_bin[bit]
+        #individuals[bit].fx = func(new_bin[bit, bit])
 
 
 def evolution(range_a, range_b, precision, tau, generations_number, save_file=True):
@@ -67,7 +69,9 @@ def evolution(range_a, range_b, precision, tau, generations_number, save_file=Tr
     bins = numpy.empty((generations_number, power), dtype=numpy.int)
     fxs = numpy.empty(generations_number, dtype=numpy.double)
     best = numpy.empty(power, dtype=numpy.int)
-    new = numpy.empty((power, power), dtype=numpy.int)
+    new_bin = numpy.empty((power, power), dtype=numpy.int)
+    new_fxs = numpy.empty(generations_number, dtype=numpy.double)
+    individuals = numpy.empty(power, dtype=object)
 
     best = get_individual(range_a, range_b, precision, power)
     bins[0] = best
@@ -75,7 +79,10 @@ def evolution(range_a, range_b, precision, tau, generations_number, save_file=Tr
     reals[0] = int_to_real(bin_to_int(bins[0,]), range_a, range_b, precision, power)
     fxs[0] = func(reals[0])
 
-    mutation(bins, new, power, generations_number)
+    for i in numpy.arange(1, generations_number):
+        mutation(bins[i], new_bin, new_fxs, power, generations_number)
+        for bit in numpy.arange(power):
+            individuals[bit] = Individual(new_bin[bit], new_fxs[bit])
 
     # print(bins[0])
     #for bit in numpy.arange(power):
