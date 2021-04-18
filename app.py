@@ -1,5 +1,5 @@
 from PyQt5 import uic, QtWidgets
-import modules, modules2
+from lib.modules import evolution
 from time import time
 import numba
 import numpy
@@ -7,32 +7,26 @@ import numpy
 Form, Window = uic.loadUiType("geo.ui")
 app = QtWidgets.QApplication([])
 window = Window()
+#window.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 form = Form()
 form.setupUi(window)
 window.show()
 
-start = time()
-range_a = -4.0
-range_b = 12.0 
-precision = 3
-generations_number = 200000
-tau = 1.5
-
 def run_evolution():
-    start = time()
-    #modules.evolution(range_a, range_b, precision, population_size, generations_number, crossover_probability, mutation_probability, elite_number, False)
-    #modules.evolution(range_a, range_b, precision, tau, generations_number, save_file=True)
-    stop = time()-start
-    print(stop)
-
-    start = time()
-    modules2.evolution(range_a, range_b, precision, tau, generations_number, save_file=True)
-    stop = time()-start
-    print(stop)
-    #form.label_time.setText(str(modules.real(798 ,range_a, range_b, precision)))
+    range_a = float(str(form.input_a.text()))
+    range_b = float(str(form.input_b.text()))
+    precision = int(str(form.input_d.text()))
+    generations_number = int(str(form.input_t.text()))
+    tau = float(str(form.input_tau.text()))
     
-    #print([int(n) for n in bin(798)[2:].zfill(14)])
-    #form.label_time.setText(str(stop))
+    start = time()
+    best = evolution(range_a, range_b, precision, tau, generations_number, save_file=True)
+    print(best.real)
+    form.best_table.item(1,0).setText(str(best.real))
+    form.best_table.item(1,1).setText(''.join(map(str, best.binary)))
+    form.best_table.item(1,2).setText(str(best.fx))
+    stop = time()-start
+    print(stop)
 
 form.button_start.clicked.connect(run_evolution)
 app.exec()
