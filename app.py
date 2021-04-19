@@ -26,7 +26,7 @@ def run_evolution():
     start = time()
     app.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-    best, fxs = evolution(range_a, range_b, precision, tau, generations_number, save_file=True)
+    best, fxs, best_fx = evolution(range_a, range_b, precision, tau, generations_number, save_file=True)
     
     form.best_table.item(1,0).setText(str(best.real))
     form.best_table.item(1,1).setText(''.join(map(str, best.binary)))
@@ -34,12 +34,18 @@ def run_evolution():
     
     chart = QChart()
     series = QLineSeries()
+    bests = QLineSeries()
     points = QScatterSeries()
 
     pen = series.pen()
     pen.setWidth(1)
     pen.setBrush(QtGui.QColor(114, 137, 218))
     series.setPen(pen)
+
+    pen_best = bests.pen()
+    pen_best.setWidth(1)
+    pen_best.setBrush(QtGui.QColor("red"))
+    bests.setPen(pen_best)
 
     pen_points = points.pen()
     pen_points.setBrush(QtGui.QColor("white"))
@@ -51,8 +57,10 @@ def run_evolution():
         if fxs[i-1] == best.fx:
             points.append(i, fxs[i-1])
         series.append(i, fxs[i-1])
+        bests.append(i, best_fx[i-1])
     
     chart.addSeries(series)
+    chart.addSeries(bests)
     chart.addSeries(points)
     
     chart.setBackgroundBrush(QtGui.QColor(41, 43, 47))

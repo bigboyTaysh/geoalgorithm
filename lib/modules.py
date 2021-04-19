@@ -69,7 +69,7 @@ def mutation(bins, individuals, power, tau):
             bins[individuals[bit-1]] = 1 - bins[individuals[bit-1]]
 
 #@numba.jit(forceobj=True)
-def get_evolution(individuals, bins, reals, fxs, new_bins, new_fxs, best, range_a, range_b, precision, power, tau, generations_number):
+def get_evolution(individuals, bins, reals, fxs, best_fxs, new_bins, new_fxs, best, range_a, range_b, precision, power, tau, generations_number):
     for i in numpy.arange(1, generations_number):
         bins[i] = bins[i-1]
         new_individuals(bins[i], new_bins, new_fxs, range_a, range_b, precision, power, generations_number)
@@ -88,6 +88,8 @@ def get_evolution(individuals, bins, reals, fxs, new_bins, new_fxs, best, range_
             best.real = reals[i]
             best.binary = bins[i]
 
+        best_fxs[i] = best.fx
+
         new_bins = numpy.empty((power, power), dtype=numpy.int)
         new_fxs = numpy.empty(power, dtype=numpy.double)
         individuals = numpy.empty(power, dtype=numpy.object)
@@ -99,6 +101,7 @@ def evolution(range_a, range_b, precision, tau, generations_number, save_file=Tr
     reals = numpy.empty(generations_number, dtype=numpy.double)
     bins = numpy.empty((generations_number, power), dtype=numpy.int)
     fxs = numpy.empty(generations_number, dtype=numpy.double)
+    best_fxs = numpy.empty(generations_number, dtype=numpy.double)
     new_bins = numpy.empty((power, power), dtype=numpy.int)
     new_fxs = numpy.empty(power, dtype=numpy.double)
     individuals = numpy.empty(power, dtype=numpy.object)
@@ -117,10 +120,11 @@ def evolution(range_a, range_b, precision, tau, generations_number, save_file=Tr
     fxs[0] = func(reals[0])
     
     best = Individual(bins[0], fxs[0], 0, reals[0])
+    best_fxs[0] = best.fx
 
-    get_evolution(individuals, bins, reals, fxs, new_bins, new_fxs, best, range_a, range_b, precision, power, tau, generations_number)
+    get_evolution(individuals, bins, reals, fxs, best_fxs, new_bins, new_fxs, best, range_a, range_b, precision, power, tau, generations_number)
 
-    return best, fxs
+    return best, fxs, best_fxs
 
 '''
 def test(tests_number, precision):
