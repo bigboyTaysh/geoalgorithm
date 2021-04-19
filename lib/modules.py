@@ -120,11 +120,7 @@ def evolution(range_a, range_b, precision, tau, generations_number, save_file=Tr
 
     get_evolution(individuals, bins, reals, fxs, new_bins, new_fxs, best, range_a, range_b, precision, power, tau, generations_number)
 
-    #print("")
-    #print(best.real)
-    #print(best.fx)
-    #print("")
-    return best
+    return best, fxs
 
 '''
 def test(tests_number, precision):

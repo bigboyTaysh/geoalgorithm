@@ -9,14 +9,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>820</width>
-    <height>538</height>
+    <width>1009</width>
+    <height>609</height>
    </rect>
   </property>
   <property name="maximumSize">
    <size>
-    <width>820</width>
-    <height>538</height>
+    <width>1050</width>
+    <height>609</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -49,8 +49,8 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>821</width>
-      <height>521</height>
+      <width>1011</width>
+      <height>611</height>
      </rect>
     </property>
     <widget class="QWidget" name="tab">
@@ -60,7 +60,7 @@
      <widget class="QPushButton" name="button_start">
       <property name="geometry">
        <rect>
-        <x>330</x>
+        <x>420</x>
         <y>60</y>
         <width>141</width>
         <height>31</height>
@@ -101,7 +101,7 @@ color: white;</string>
      <widget class="QLineEdit" name="input_a">
       <property name="geometry">
        <rect>
-        <x>200</x>
+        <x>300</x>
         <y>20</y>
         <width>41</width>
         <height>21</height>
@@ -120,7 +120,7 @@ color: white;</string>
      <widget class="QLineEdit" name="input_d">
       <property name="geometry">
        <rect>
-        <x>400</x>
+        <x>500</x>
         <y>20</y>
         <width>41</width>
         <height>21</height>
@@ -139,7 +139,7 @@ color: white;</string>
      <widget class="QLabel" name="label">
       <property name="geometry">
        <rect>
-        <x>170</x>
+        <x>270</x>
         <y>20</y>
         <width>21</width>
         <height>20</height>
@@ -158,7 +158,7 @@ color: white;</string>
      <widget class="QLabel" name="label_2">
       <property name="geometry">
        <rect>
-        <x>250</x>
+        <x>350</x>
         <y>20</y>
         <width>21</width>
         <height>20</height>
@@ -177,7 +177,7 @@ color: white;</string>
      <widget class="QLineEdit" name="input_b">
       <property name="geometry">
        <rect>
-        <x>280</x>
+        <x>380</x>
         <y>20</y>
         <width>41</width>
         <height>21</height>
@@ -196,7 +196,7 @@ color: white;</string>
      <widget class="QLabel" name="label_3">
       <property name="geometry">
        <rect>
-        <x>340</x>
+        <x>440</x>
         <y>20</y>
         <width>51</width>
         <height>20</height>
@@ -215,7 +215,7 @@ color: white;</string>
      <widget class="QLabel" name="label_4">
       <property name="geometry">
        <rect>
-        <x>450</x>
+        <x>550</x>
         <y>20</y>
         <width>21</width>
         <height>20</height>
@@ -234,7 +234,7 @@ color: white;</string>
      <widget class="QLineEdit" name="input_tau">
       <property name="geometry">
        <rect>
-        <x>480</x>
+        <x>580</x>
         <y>20</y>
         <width>41</width>
         <height>21</height>
@@ -253,7 +253,7 @@ color: white;</string>
      <widget class="QLineEdit" name="input_t">
       <property name="geometry">
        <rect>
-        <x>560</x>
+        <x>660</x>
         <y>20</y>
         <width>41</width>
         <height>21</height>
@@ -273,7 +273,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QLabel" name="label_5">
       <property name="geometry">
        <rect>
-        <x>530</x>
+        <x>630</x>
         <y>20</y>
         <width>21</width>
         <height>20</height>
@@ -295,7 +295,7 @@ color: rgb(255, 255, 255);</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>100</x>
+        <x>190</x>
         <y>110</y>
         <width>601</width>
         <height>61</height>
@@ -477,6 +477,19 @@ color: rgb(255, 255, 255);</string>
        </property>
       </item>
      </widget>
+     <widget class="QChartView" name="widget" native="true">
+      <property name="geometry">
+       <rect>
+        <x>-10</x>
+        <y>180</y>
+        <width>1021</width>
+        <height>401</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(41, 43, 47);</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
@@ -485,8 +498,15 @@ color: rgb(255, 255, 255);</string>
     </widget>
    </widget>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QWidget</extends>
+   <header>PyQt5.QtChart</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
