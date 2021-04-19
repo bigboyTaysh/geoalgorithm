@@ -8,7 +8,7 @@ import time
 import csv
 from time import time
 import numba
-from lib.models import Individual
+from lib.models import Individual, Test
 
 @numba.jit(nopython=True, fastmath=True)
 def random_real(range_a,  range_b,  precision):
@@ -34,7 +34,7 @@ def bin_to_int(binary):
 
 
 def int_to_bin(integer, power):
-    return numpy.asarray([numpy.int(n) for n in bin(integer)[2:].zfill(power)], dtype=numpy.int)
+    return numpy.asarray([int(n) for n in bin(integer)[2:].zfill(power)], dtype=int)
 
 
 @numba.jit(nopython=True, fastmath=True)
@@ -68,7 +68,7 @@ def mutation(bins, individuals, power, tau):
         if r <= t:
             bins[individuals[bit-1]] = 1 - bins[individuals[bit-1]]
 
-#@numba.jit(forceobj=True)
+
 def get_evolution(individuals, bins, reals, fxs, best_fxs, new_bins, new_fxs, best, range_a, range_b, precision, power, tau, generations_number):
     for i in numpy.arange(1, generations_number):
         bins[i] = bins[i-1]
@@ -77,7 +77,7 @@ def get_evolution(individuals, bins, reals, fxs, best_fxs, new_bins, new_fxs, be
             individuals[bit] = Individual(new_bins[bit], new_fxs[bit], bit)
 
         individuals = sorted(individuals)
-        individuals_bins = numpy.array([individual.id for individual in individuals], dtype=numpy.int)
+        individuals_bins = numpy.array([individual.id for individual in individuals], dtype=int)
         mutation(bins[i], individuals_bins, power, tau)
 
         reals[i] = int_to_real(bin_to_int(bins[i]), range_a, range_b, precision, power)
@@ -90,21 +90,19 @@ def get_evolution(individuals, bins, reals, fxs, best_fxs, new_bins, new_fxs, be
 
         best_fxs[i] = best.fx
 
-        new_bins = numpy.empty((power, power), dtype=numpy.int)
+        new_bins = numpy.empty((power, power), dtype=int)
         new_fxs = numpy.empty(power, dtype=numpy.double)
-        individuals = numpy.empty(power, dtype=numpy.object)
-
-
+        individuals = numpy.empty(power, dtype=object)
 
 def evolution(range_a, range_b, precision, tau, generations_number, save_file=True):
     power = power_of_2(range_a, range_b, precision)
     reals = numpy.empty(generations_number, dtype=numpy.double)
-    bins = numpy.empty((generations_number, power), dtype=numpy.int)
+    bins = numpy.empty((generations_number, power), dtype=int)
     fxs = numpy.empty(generations_number, dtype=numpy.double)
     best_fxs = numpy.empty(generations_number, dtype=numpy.double)
-    new_bins = numpy.empty((power, power), dtype=numpy.int)
+    new_bins = numpy.empty((power, power), dtype=int)
     new_fxs = numpy.empty(power, dtype=numpy.double)
-    individuals = numpy.empty(power, dtype=numpy.object)
+    individuals = numpy.empty(power, dtype=object)
 
     bins[0] = get_individual(range_a, range_b, precision, power)
     
@@ -114,7 +112,7 @@ def evolution(range_a, range_b, precision, tau, generations_number, save_file=Tr
         individuals[bit] = Individual(new_bins[bit], new_fxs[bit], bit + 1)
 
     individuals = sorted(individuals)
-    individuals_bins = numpy.array([individual.id for individual in individuals], dtype=numpy.int)
+    individuals_bins = numpy.array([individual.id for individual in individuals], dtype=int)
     mutation(bins[0], individuals_bins, power, tau)
     reals[0] = int_to_real(bin_to_int(bins[0]), range_a, range_b, precision, power)
     fxs[0] = func(reals[0])
@@ -125,6 +123,20 @@ def evolution(range_a, range_b, precision, tau, generations_number, save_file=Tr
     get_evolution(individuals, bins, reals, fxs, best_fxs, new_bins, new_fxs, best, range_a, range_b, precision, power, tau, generations_number)
 
     return best, fxs, best_fxs
+
+
+
+def test_tau(range_a, range_b, precision, generations_number):
+    tests = numpy.empty(50, dtype=Test)
+    best_fxs = numpy.empty(100, dtype=numpy.double)
+
+    for index, tau_number in enumerate(numpy.round(numpy.arange(0.1, 5.1, 0.1), 2)):
+        for i in numpy.arange(100):
+            best , _, _ = evolution(range_a, range_b, precision, tau_number, generations_number, save_file=True)
+            best_fxs[i] = best.fx
+        tests[index] = Test(tau_number, generations_number, numpy.average(best_fxs))
+
+    return sorted(tests)
 
 '''
 def test(tests_number, precision):
