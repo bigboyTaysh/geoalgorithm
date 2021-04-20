@@ -1,9 +1,10 @@
 from PyQt5 import uic, QtWidgets, QtCore, QtGui
-from lib.modules import evolution, test_tau
+from lib.modules import evolution, test_tau, test_generation
 from time import time
 import numpy
 from PyQt5.QtChart import QChart, QLineSeries, QScatterSeries
 from lib.models import Test
+import csv
 
 Form, Window = uic.loadUiType("geo.ui")
 app = QtWidgets.QApplication([])
@@ -25,14 +26,13 @@ def run_evolution():
     tau = float(str(form.input_tau.text()))
     generations_number = int(str(form.input_t.text()))
 
-    start = time()
     app.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-    best, fxs, best_fx = evolution(range_a, range_b, precision, tau, generations_number, save_file=True)
+    best_binary, best_real, fxs, best_fx = evolution(range_a, range_b, precision, tau, generations_number)
     
-    form.best_table.item(1,0).setText(str(best.real))
-    form.best_table.item(1,1).setText(''.join(map(str, best.binary)))
-    form.best_table.item(1,2).setText(str(best.fx))
+    form.best_table.item(1,0).setText(str(best_real[generations_number-1]))
+    form.best_table.item(1,1).setText(''.join(map(str, best_binary[generations_number-1])))
+    form.best_table.item(1,2).setText(str(best_fx[generations_number-1]))
     
     chart = QChart()
     series = QLineSeries()
@@ -56,7 +56,7 @@ def run_evolution():
     points.setPen(pen_points)
 
     for i in range(1, generations_number+1):
-        if fxs[i-1] == best.fx:
+        if fxs[i-1] == best_fx[generations_number-1]:
             points.append(i, fxs[i-1])
         series.append(i, fxs[i-1])
         bests.append(i, best_fx[i-1])
@@ -76,13 +76,60 @@ def run_evolution():
     chart.axisY().setLabelsColor(QtGui.QColor("white"))
     form.widget.setChart(chart)
 
+    with open('best_history.csv', 'w', newline='', encoding='utf8') as history_csvfile:
+        history_writer = csv.writer(
+            history_csvfile, delimiter=';', dialect=csv.excel)
+        history_writer.writerow(['Parametry'])
+        history_writer.writerow(['Precyzja: 10^-%d' % precision])
+        history_writer.writerow(['Tau: %d' % tau])
+        history_writer.writerow(['Pokolenia: %d' % generations_number])
+        history_writer.writerow(['', 'vbest', 'vbin', 'f(vbest)'])
+        index = 1
+        for generation in numpy.arange(generations_number):
+            history_writer.writerow([index,  best_real[generation], best_binary[generation], best_fx[generation]])
+            index += 1
+
     app.restoreOverrideCursor()
-    stop = time()-start
-    print(stop)
 
 def test_generations():
-    tau = float(str(form.input_tau.text()))
-    print(str(tau))
+    range_a = float(str(form.input_a_test.text()))
+    range_b = float(str(form.input_b_test.text()))
+    precision = int(str(form.input_d_test.text()))
+    tau = float(str(form.input_tau_test.text()))
+
+    app.setOverrideCursor(QtCore.Qt.WaitCursor)
+    start = time()
+    result  = test_generation(range_a, range_b, precision, tau)
+
+    chart = QChart()
+    series_bests = QLineSeries()
+
+    form.test_table.setRowCount(0)
+
+    for i in range(0, 40):
+        series_bests.append(result[i,0], result[i,1])
+
+    chart.addSeries(series_bests)
+    chart.setBackgroundBrush(QtGui.QColor(41, 43, 47))
+    chart.createDefaultAxes()
+    chart.legend().hide()
+    chart.setContentsMargins(-10, -10, -10, -10)
+    chart.layout().setContentsMargins(0, 0, 0, 0)
+    chart.axisX().setTickCount(9)
+    chart.axisY().setRange(-2, 2)
+    chart.axisX().setLabelsColor(QtGui.QColor("white"))
+    chart.axisY().setLabelsColor(QtGui.QColor("white"))
+    form.widget_test.setChart(chart)
+
+    result_sort = result[numpy.argsort(-result[:, 1])] 
+
+    for i in range(0, 40):
+        form.test_table.insertRow(i)
+        form.test_table.setItem(i, 0, QtWidgets.QTableWidgetItem(str(round(result_sort[i,0],2))))
+        form.test_table.setItem(i, 1, QtWidgets.QTableWidgetItem(str(tau)))
+        form.test_table.setItem(i, 2, QtWidgets.QTableWidgetItem(str(result_sort[i,1])))
+
+    app.restoreOverrideCursor()
 
 def test_taus():
     range_a = float(str(form.input_a_test.text()))
@@ -90,36 +137,39 @@ def test_taus():
     precision = int(str(form.input_d_test.text()))
     generations_number = int(str(form.input_t_test.text()))
 
+    app.setOverrideCursor(QtCore.Qt.WaitCursor)
     start = time()
-    tests = test_tau(range_a, range_b, precision, generations_number)
-    print(time()-start)
-
+    result  = test_tau(range_a, range_b, precision, generations_number)
+    
     chart = QChart()
     series_bests = QLineSeries()
 
     form.test_table.setRowCount(0)
 
     for i in range(0, 50):
-        series_bests.append(i, tests[i].fx)
-        form.test_table.insertRow(i)
-        form.test_table.setItem(i, 0, QtWidgets.QTableWidgetItem(str(tests[i].tau)))
-        form.test_table.setItem(i, 1, QtWidgets.QTableWidgetItem(str(tests[i].generations_number)))
-        form.test_table.setItem(i, 2, QtWidgets.QTableWidgetItem(str(tests[i].fx)))
-
-
+        series_bests.append(result[i,0], result[i,1])
 
     chart.addSeries(series_bests)
-
     chart.setBackgroundBrush(QtGui.QColor(41, 43, 47))
     chart.createDefaultAxes()
     chart.legend().hide()
     chart.setContentsMargins(-10, -10, -10, -10)
     chart.layout().setContentsMargins(0, 0, 0, 0)
-    chart.axisX().setRange(0.1, 5.0)
+    chart.axisX().setTickCount(8)
     chart.axisY().setRange(-2, 2)
     chart.axisX().setLabelsColor(QtGui.QColor("white"))
     chart.axisY().setLabelsColor(QtGui.QColor("white"))
     form.widget_test.setChart(chart)
+
+    result_sort = result[numpy.argsort(-result[:, 1])] 
+
+    for i in range(0, 50):
+        form.test_table.insertRow(i)
+        form.test_table.setItem(i, 0, QtWidgets.QTableWidgetItem(str(round(result_sort[i,0],2))))
+        form.test_table.setItem(i, 1, QtWidgets.QTableWidgetItem(str(generations_number)))
+        form.test_table.setItem(i, 2, QtWidgets.QTableWidgetItem(str(result_sort[i,1])))
+    
+    app.restoreOverrideCursor()
 
 form.button_start.clicked.connect(run_evolution)
 form.button_test_generations.clicked.connect(test_generations)
